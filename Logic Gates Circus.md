@@ -20,8 +20,6 @@
 
    
 
-![nandgate2](pictures/logicgates/nandgate2.png)
-
 4. NOR GATE 
 
    跟NAND GATE一样，NOR GATE是OR GATE的补集
