@@ -55,7 +55,7 @@ func main(){
 
 HTML的写法：
 
-```
+```html
  <ul>{{.people.steve.name}}
    <li>年龄: {{.people.steve.age}}</li>
    <li>性别: {{people.steve.gender}}</li>
@@ -64,7 +64,7 @@ HTML的写法：
 
 模板中可以写判断语句
 
-```
+```go
 <body>
     <ul>{{.people.steve.name}}
         <li>年龄: {{.people.steve.age}}</li>
