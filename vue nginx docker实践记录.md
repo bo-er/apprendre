@@ -72,8 +72,8 @@ events {
 
 
 http{
-     
-
+    include       mime.types;
+    default_type  application/octet-stream;   
     server {
         listen 80;
         server_name localhost;   
@@ -81,7 +81,15 @@ http{
         index index.html index.htm;   
 
         location / {
+        include       mime.types;
+        default_type  application/octet-stream;    
         try_files $uri $uri/ @router; # 配置使用路由
+        }
+        location ~ \.css {
+        add_header  Content-Type    text/css;
+        }
+        location ~ \.js {
+        add_header  Content-Type    application/x-javascript;
         }
 
         # 路由配置信息
@@ -89,7 +97,7 @@ http{
         rewrite ^.*$ /index.html last;
         }
         location /api/ {
-        proxy_pass http://swsiot-serv:10088;
+        proxy_pass http://swsiot:10088;
         }
     }
 }
