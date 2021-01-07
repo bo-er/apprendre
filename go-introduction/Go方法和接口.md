@@ -1,7 +1,5 @@
 ## 方法
 
-### 为结构体定义方法
-
 Go 语言没有类。不过你可以为类型定义方法。方法也使用 func 关键字（因为它就是函数，不过稍微特殊）。
 
 方法就是一类带特殊的 **接收者** 参数的函数。
@@ -30,6 +28,8 @@ type PrintableMutex struct {
 // MyBlock is an interface type that has the same method set as Block.
 type MyBlock Block
 ```
+
+### 为结构体定义方法
 
 在下面的例子中， Abs 方法拥有一个名为 v,类型为 Vertext 的接收者。
 
@@ -114,7 +114,9 @@ func main() {
 ### 指针接收者
 
 你可以为指针接收者声明方法
-这意味着对于某类型 T，接收者的类型可以用*T 的语法。(此外，T 不能是像*int 这样的指针)
+
+这意味着对于某类型 T，接收者的类型可以用\*T 的语法。
+
 下面的例子为\*Vertex 定义了 Scale 方法
 
 ```go
