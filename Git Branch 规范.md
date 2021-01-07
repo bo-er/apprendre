@@ -1,6 +1,6 @@
 ## Git Branch 规范
 
-### [🐞update](https://github.com/bo-er/iot-frontend/commit/531e1854191160e6c164c4705a00899008a14a4c)
+### 
 
 ### 分支管理必要性
 

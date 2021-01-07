@@ -2,11 +2,34 @@
 
 ### 为结构体定义方法
 
-Go 语言没有类。不过你可以为结构体类型定义方法。方法也使用 func 关键字（因为它就是函数，不过稍微特殊）。
+Go 语言没有类。不过你可以为类型定义方法。方法也使用 func 关键字（因为它就是函数，不过稍微特殊）。
 
 方法就是一类带特殊的 **接收者** 参数的函数。
 
 方法接收者在它自己的参数列表内，位于 func 关键字和方法名之间。
+
+```go
+// A Mutex is a data type with two methods, Lock and Unlock.
+type Mutex struct         { /* Mutex fields */ }
+func (m *Mutex) Lock()    { /* Lock implementation */ }
+func (m *Mutex) Unlock()  { /* Unlock implementation */ }
+
+// NewMutex has the same composition as Mutex but its method set is empty.
+type NewMutex Mutex
+
+// The method set of PtrMutex's underlying type *Mutex remains unchanged,
+// but the method set of PtrMutex is empty.
+type PtrMutex *Mutex
+
+// The method set of *PrintableMutex contains the methods
+// Lock and Unlock bound to its embedded field Mutex.
+type PrintableMutex struct {
+	Mutex
+}
+
+// MyBlock is an interface type that has the same method set as Block.
+type MyBlock Block
+```
 
 在下面的例子中， Abs 方法拥有一个名为 v,类型为 Vertext 的接收者。
 

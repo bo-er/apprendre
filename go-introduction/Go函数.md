@@ -337,6 +337,35 @@ func do(s string) (func(int, int) int, error) {
 
 ## 匿名函数和闭包
 
+### 作用域模型
+
+`Go is lexically scoped using blocks`
+作用域模型决定了哪些值会绑定到哪些变量。在程序的世界有着两种作用域模型:`Dynamic` and `Static`(`Lexical`),其中`Lexical`更为常用并且也是 Javascript 所采用的。
+
+在静态作用域(`static scope`)的语言中，变量的定义由搜索包含它的代码块或者函数来解决，如果没有搜索到则会继续寻找外层代码块。而动态作用域(`dynamic scope`)语言则是先搜索调用者，然后是调用者的调用者，直到找到变量的定义。静态作用域中的变量永远指向它的顶级环境，而与程序运行时的 call stack 无关，这种特点让编写模块化的代码变得更简单，因为及程序员只需要看看代码就知道变量的作用域。
+
+下面的例子说明了 Go 的作用域是静态的:
+
+```go
+var x int = 10
+
+func g() func() int {
+	var x int = 20
+	fmt.Printf("inner x is:%d\n", x)
+	return f
+}
+
+func f() int {
+	return x
+}
+
+func main() {
+	fmt.Println(g()())
+}
+```
+
+打印结果是 10 而不是 20
+
 ### 匿名函数
 
 函数当然还可以作为返回值，但是在 Go 语言中函数内部不能再像之前那样定义函数了，只能定义匿名函数。匿名函数就是没有函数名的函数，匿名函数的定义格式如下：
@@ -368,7 +397,65 @@ func main() {
 
 ### 闭包
 
-闭包指的是一个函数和与其相关的引用环境组合而成的实体。简单来说，`闭包=函数+引用环境`。 首先我们来看一个例子：
+Go 语言提供了匿名函数，而匿名函数可以用于组成闭包。
+
+闭包是一种特殊的匿名函数，这种特殊的函数使用了声明在函数外部的变量。
+
+闭包指的是一个函数和与其相关的引用环境组合而成的实体。简单来说，`闭包=函数+引用环境`。
+首先看一个较为简单的例子:
+
+```go
+var x int = 0
+func main() {
+
+	counter := func() int {
+		x++
+		return x
+	}
+	fmt.Println(counter())
+	fmt.Println(counter())
+}
+
+```
+
+执行上面的函数将会打印:
+
+```
+0
+1
+```
+
+x 并没有作为参数传递给匿名函数，但是函数能够访问它。这个例子有一个问题是任何函数都能修改这个全局变量，因此实际上的闭包是像下面这样使用的:
+
+```go
+
+func addCounter() func() int {
+	var x int = 1
+	return func() int {
+		x++
+		return x
+	}
+}
+
+func main() {
+	add := addCounter()
+	fmt.Println(add())
+	fmt.Println(add())
+}
+```
+
+打印结果为:
+
+```
+1
+2
+```
+
+上面体现了闭包的一个作用:可以用于数据隔离。
+
+并且通过上面的例子我们可以很明显的发现，哪怕 add()函数运行结束，闭包仍然引用了变量 x。
+
+再看一个例子：
 
 ```go
 func adder() func(int) int {
