@@ -573,7 +573,7 @@ hello
 ### nil 接口值
 
 nil 接口值既不保存值也不保存具体类型
-为 nil 接口调用方法会产生运行时的错误，因为接口的元组内并未包含能够指明该调用哪个`具体`方法的类型。
+使用 nil 接口调用方法会产生运行时的错误，因为接口的元组内并未包含能够指明该调用哪个`具体`方法的类型。
 
 ```go
 package main
@@ -587,12 +587,25 @@ type I interface {
 func main() {
 	var i I
 	describe(i)
-	i.M()
+	i.M() //使用nil接口(既没有接口值也没有接口类型)调用方法将直接报错。
 }
 
 func describe(i I) {
 	fmt.Printf("(%v, %T)\n", i, i)
 }
+```
+
+打印结果:
+
+```go
+(<nil>, <nil>)
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0x10a874f]
+
+goroutine 1 [running]:
+main.main()
+        /Users/steve/Documents/GIT/effective-go/method/main.go:12 +0x8f
+exit status 2
 ```
 
 ### 空接口
@@ -843,12 +856,13 @@ func main() {
 		fmt.Println(err)
 	}
 }
+
+```
+
 打印结果:
-```
 
+```
 at 2009-11-10 23:00:00 +0000 UTC m=+0.000000001, it didn't work
-
-```
 
 ```
 
