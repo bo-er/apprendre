@@ -15,7 +15,7 @@ f(x,y,z)
 对 f,x,y 跟 z 的取值发生在当前 goroutine,而 f 函数的执行发生在新的 goroutine 中。
 goroutine 在相同的地址空间中运行，因此在访问共享的内存时必须进行同步。sync 包提供了这种能力，不过在 go 中并不会经常用到，因为还有其它的办法。
 
-##通道
+## 通道
 
 通道是带有类型的管道，你可以通过通道操作符<-来发送或者接收值,箭头就是数据流的方向。
 
@@ -292,11 +292,9 @@ func main() {
   ```go
   package main
 
-
-
   func main() {
-  ch := make(chan int)
-  <-ch
+    ch := make(chan int)
+    <-ch
   }
   ```
 
@@ -310,14 +308,14 @@ func main() {
   )
 
   func main() {
-  ch := make(chan int, 3)
-  ch <- 1
-  select {
-  case v := <-ch:
-      fmt.Println(v)
-  default:
-      fmt.Println("chan has no data")
-  }
+    ch := make(chan int, 3)
+    ch <- 1
+    select {
+      case v := <-ch:
+        fmt.Println(v)
+      default:
+        fmt.Println("chan has no data")
+    }
   }
   ```
 
@@ -423,7 +421,7 @@ func main() {
       // range 一直读取直到chan关闭，否则产生阻塞死锁
       for v := range ch {
           fmt.Println(v)
-      }
+        }
       }
   ```
 
