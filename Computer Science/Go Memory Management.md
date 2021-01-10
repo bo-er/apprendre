@@ -37,7 +37,7 @@ However, certain requirements will exclude some choices of memory in certain con
 
 [Escape analysis](https://en.wikipedia.org/wiki/Escape_analysis) is used to determine whether an item can be allocated on the stack. It determines if an item created in a function (e.g., a local variable) can escape out of that function or to other goroutines. For example, in the following function, x escapes from the function that defines it:
 
-```
+```go
 package escapeanalysis
 
 func Foo() *int {
@@ -46,7 +46,7 @@ func Foo() *int {
 }
 ```
 
-Items that escape must be allocated on the heap. Thus _x_ would be allocated on the heap.[2](https://dougrichardson.us/2016/01/23/go-memory-allocations.html#fn:1)
+Items that escape must be allocated on the heap. Thus _x_ would be allocated on the heap.(https://dougrichardson.us/2016/01/23/go-memory-allocations.html#fn:1)
 
 The exact escape analysis algorithm can change between Go versions. However, you can use `go tool compile -m` to print optimization decisions, which include the escape analysis. For example, on the previous program with Go version 1.5.2, you get the following output:
 

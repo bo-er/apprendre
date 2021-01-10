@@ -1793,11 +1793,11 @@ func Announce(message string, delay time.Duration) {
 
 在 Go 中，匿名函数是闭包：实现可确保函数所引用的变量只要处于活动状态就可以保留。
 
-这些示例不太实用，因为这些函数无法发出完成信号的方式。为此，我们需要通道。
+这些示例不太实用，因为这些函数无法发出完成信号。为此，我们需要通道。
 
 ### 通道
 
-与映射一样，通道也用`make`分配，并且结果值是对基础数据结构的引用。如果提供了可选的整数参数，则它将设置通道的缓冲区大小。对于**无缓冲**或同步通道，默认值为零。
+与映射一样，通道也用`make`分配，并且结果值是对基础数据结构的引用。如果提供了可选的整数参数，则它将设置通道的缓冲区大小。对于**无缓冲**（同步通道），默认值为零。
 
 ```
 ci：= make（chan int）//无缓冲的整数通道
@@ -2008,22 +2008,22 @@ var numCPU = runtime.GOMAXPROCS（0）
 
 ### 缓冲区泄漏
 
-并发编程工具甚至可以使非并发思想更容易表达。这是从 RPC 包中抽象出来的示例。客户端 goroutine 循环从某个来源（可能是网络）接收数据。为了避免分配和释放缓冲区，它会保留一个空闲列表，并使用一个缓冲通道来表示它。如果通道为空，则会分配一个新的缓冲区。消息缓冲区准备就绪后，它将通过发送到服务器 `serverChan`。
+并发编程工具甚至可以使非并发思想更容易表达。下面是从 RPC 包中抽象出来的示例。客户端 goroutine 循环从某个来源（可能是网络）接收数据。为了避免分配和释放缓冲区，它会保留一个空闲列表，并使用一个缓冲通道来表示它。如果通道为空，则会分配一个新的缓冲区。消息缓冲区准备就绪后，它将被发送到`serverChan`的服务器 。
 
-```
+```go
 var freeList = make（chan * Buffer，100）
 var serverChan = make（chan * Buffer）
 
 func client（）{
-    为{
-        var b *缓冲区
-        //获取一个缓冲区（如果有）；如果没有分配。
-        选择 {
-        情况b = <-freeList：
+    for{
+        var b *Buffer
+        //获取一个缓冲区（如果有）；如果没有则分配一个新的缓冲区。
+        select {
+        case b = <-freeList：
             // 拿到一个; 无事可做。
-        默认：
+        default：
             //没有一个免费的，因此分配一个新的。
-            b = new（缓冲区）
+            b = new（Buffer）
         }
         load（b）//从网上读取下一条消息。
         serverChan <-b //发送到服务器。
@@ -2033,100 +2033,102 @@ func client（）{
 
 服务器循环从客户端接收每个消息，对其进行处理，然后将缓冲区返回到空闲列表。
 
-```
+```go
 func server（）{
-    为{
+    for{
         b：= <-serverChan //等待工作。
-        处理（b）
+        process（b）
         //如果有空间，请重新使用缓冲区。
-        选择 {
+        select {
         case freeList <-b：
             //在空闲列表上缓冲 无事可做。
-        默认：
+        default：
             //免费列表已满，只需继续。
         }
     }
 }
 ```
 
-客户端尝试从中检索缓冲区`freeList`；如果没有可用的，它将分配一个新的。除非列表已满，否则服务器的“发送至”`freeList`将放`b`回到空闲列表中，在这种情况下，缓冲区会放在地板上，以供垃圾收集器回收。（`default`语句中的子句在`select` 没有其他情况下准备就绪时执行，这意味着`selects`永不阻塞。）此实现仅依靠几行内容就建立了一个无泄漏存储桶列表，并依赖于缓冲通道和垃圾收集器进行簿记。
+客户端尝试从中`freeList`中获取一个 Buffer；如果没有可用的，它将分配一个新的。除非列表已满，否则服务器将 buffer 放回到空闲列表中，在这种空闲列表已满的情况下，缓冲区会被垃圾收集器回收。（`default`语句中的子句在`select` 没有其他`case`准备就绪时执行，这意味着`selects`永不阻塞。）此实现仅依靠几行内容就建立了一个无泄漏存储桶列表，并依赖于缓冲通道和垃圾收集器进行记录。
 
-## 失误
+## Errors
 
-库例程必须经常向调用者返回某种错误指示。如前所述，Go 的多值返回可以轻松地在正常返回值旁边返回详细的错误描述。使用此功能提供详细的错误信息是一种很好的方式。例如，正如我们将看到的那样，`os.Open`不仅会`nil`在失败时返回一个指针，还会返回一个描述错误原因的错误值。
+Library routines 必须经常向调用者返回某种错误指示。如前所述，Go 的多值返回可以轻松地在正常返回值旁边返回详细的错误描述。使用此功能提供详细的错误信息是一种很好的方式。例如，正如我们将看到的那样，`os.Open`不仅会`nil`在失败时返回一个指针，还会返回一个描述错误原因的错误值。
 
 按照惯例，错误的类型为`error`，是一个简单的内置接口。
 
-```
-类型错误界面{
-    Error（）字符串
+```go
+type error interface{
+    Error（）string
 }
 ```
 
-图书馆作者可以自由地用一个更丰富的模型来实现此接口，从而不仅可以看到错误，而且可以提供一些上下文。如前所述，除了通常的`*os.File` 返回值外，`os.Open`还返回错误值。如果文件成功打开，则错误将为`nil`，但是如果出现问题，它将包含 `os.PathError`：
+Library 作者可以自由地用一个更丰富的模型来实现此接口，从而不仅可以看到错误，而且可以提供一些上下文。如前所述，除了通常的`*os.File` 返回值外，`os.Open`还返回错误值。如果文件成功打开，则错误将为`nil`，但是如果出现问题，它将包含一个 `os.PathError`：
 
-```
-// PathError记录错误，并且操作和
-//导致它的文件路径。
-输入PathError struct {
-    操作字符串//“打开”，“取消链接”等
-    路径字符串//关联的文件。
-    错误错误//由系统调用返回。
+```go
+// PathError records an error and the operation and
+// file path that caused it.
+type PathError struct {
+    Op string    // "open", "unlink", etc.
+    Path string  // The associated file.
+    Err error    // Returned by the system call.
 }
 
-func（e * PathError）Error（）字符串{
-    返回e.Op +“” + e.Path +“：” + e.Err.Error（）
+func (e *PathError) Error() string {
+    return e.Op + " " + e.Path + ": " + e.Err.Error()
 }
+
 ```
 
 `PathError`的会`Error`产生一个像这样的字符串：
 
 ```
-打开/ etc / passwx：没有这样的文件或目录
+open /etc/passwx: no such file or directory
 ```
 
-这种错误，包括有问题的文件名，操作以及所触发的操作系统错误，即使在导致错误的调用远未打印的情况下也有用。它比普通的“没有这样的文件或目录”提供更多信息。
+这种错误包括了有问题的文件名，操作以及所触发的操作系统错误，即使在导致错误的调用远未打印的情况下也有用。它比普通的“没有这样的文件或目录”提供更多信息。
 
 在可行的情况下，错误字符串应标识其来源，例如通过使用前缀来命名产生错误的操作或程序包。例如，在 package 中 `image`，由于未知格式导致的解码错误的字符串表示形式是“ image：unknown format”。
 
-关心精确错误详细信息的调用者可以使用类型切换或类型断言来查找特定错误并提取详细信息。为此，`PathErrors` 可能包括检查内部`Err` 字段是否存在可恢复的故障。
+关心精确错误详细信息的调用者可以使用类型切换或类型断言来查找特定错误并提取详细信息。对`PathErrors` 来说可能包括检查内部`Err` 字段是否存在可恢复的故障。
 
-```
-尝试：= 0; 尝试<2; 试试++ {
-    文件，err = os.Create（文件名）
-    如果err == nil {
-        返回
+```go
+for try := 0; try < 2; try++ {
+    file, err = os.Create(filename)
+    if err == nil {
+        return
     }
-    如果e，好的：=错误（* os.PathError）; ok && e.Err == syscall.ENOSPC {
-        deleteTempFiles（）//恢复一些空间。
-        继续
+    if e, ok := err.(*os.PathError); ok && e.Err == syscall.ENOSPC {
+        deleteTempFiles()  // Recover some space.
+        continue
     }
-    返回
+    return
 }
 ```
 
-`if`这里 的第二条语句是另一种[类型断言](https://golang.google.cn/doc/effective_go.html#interface_conversions)。如果失败，`ok`则为 false，`e` 为`nil`。如果成功， 则为`ok`true，表示错误的类型为`*os.PathError`，然后为`e`，我们可以检查该错误的更多信息。
+这里第二条语句的`if`是另一种[类型断言](https://golang.google.cn/doc/effective_go.html#interface_conversions)。如果失败，`ok`则为 false，`e` 为`nil`。如果成功， 则为`ok`为true，表示错误的类型为`*os.PathError`，然后`e`也是一样，我们可以检查该错误的更多信息。
 
-### 恐慌
+### Panic
 
-向调用者报告错误的通常方法是返回 an `error`作为额外的返回值。规范 `Read`方法是一个众所周知的实例。它返回一个字节数和一个`error`。但是，如果错误无法恢复怎么办？有时程序根本无法继续。
+向调用者报告错误的通常方法是返回一个 `error`作为额外的返回值。规范 `Read`方法是一个众所周知的实例。它返回一个字节数和一个`error`。但是，如果错误无法恢复怎么办？有时程序根本无法继续。
 
 为此，有一个内置函数`panic` 实际上会创建一个运行时错误，该错误将使程序停止运行（但请参阅下一节）。该函数采用一个任意类型的参数（通常是字符串），以便在程序死亡时打印出来。这也是一种指示发生了不可能的事情的方法，例如退出无限循环。
 
-```
-//使用牛顿方法的多维数据集根的玩具实现。
-func CubeRoot（x float64）float64 {
-    z：= x / 3 //任意初始值
-    对于我：= 0; 我<1e6; 我++ {
-        上一个：= z
-        z-=（z * z * zx）/（3 * z * z）
-        如果veryClose（z，prevz）{
-            返回z
+```go
+// A toy implementation of cube root using Newton's method.
+func CubeRoot(x float64) float64 {
+    z := x/3   // Arbitrary initial value
+    for i := 0; i < 1e6; i++ {
+        prevz := z
+        z -= (z*z*z-x) / (3*z*z)
+        if veryClose(z, prevz) {
+            return z
         }
     }
-    //一百万次迭代尚未收敛；出了点问题。
-    恐慌（fmt.Sprintf（“ CubeRoot（％g）未收敛”，x））
+    // A million iterations has not converged; something is wrong.
+    panic(fmt.Sprintf("CubeRoot(%g) did not converge", x))
 }
+
 ```
 
 这只是一个示例，但实际的库函数应避免使用`panic`。如果问题可以掩盖或解决，最好还是让事情继续运行而不是取消整个程序。一个可能的反例是在初始化期间：如果该库确实无法进行设置，那么恐慌是可以理解的。
