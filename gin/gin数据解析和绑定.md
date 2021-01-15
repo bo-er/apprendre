@@ -1,15 +1,15 @@
 ## 数据解析
 
-### 获取querystring参数
+### 获取 querystring 参数
 
-`querystring`指的是URL中`?`后面携带的参数，例如：`/user/search?username=fool&age=18`。 获取请求的querystring参数的方法如下：
+`querystring`指的是 URL 中`?`后面携带的参数，例如：`/user/search?username=fool&age=18`。 获取请求的 querystring 参数的方法如下：
 
 ```go
 func main() {
 	//Default返回一个默认的路由引擎
 	r := gin.Default()
 	r.GET("/user/search", func(c *gin.Context) {
-		username := c.DefaultQuery("fool", "18")
+		username := c.DefaultQuery("username", "18")
 		//username := c.Query("username")
 		age := c.Query("age")
 		//输出json结果给调用方
@@ -23,9 +23,9 @@ func main() {
 }
 ```
 
-### 获取form参数
+### 获取 form 参数
 
-请求的数据通过form表单来提交，例如向`/user/search`发送一个POST请求，获取请求数据的方式如下：
+请求的数据通过 form 表单来提交，例如向`/user/search`发送一个 POST 请求，获取请求数据的方式如下：
 
 ```go
 func main() {
@@ -47,9 +47,9 @@ func main() {
 }
 ```
 
-### 获取path参数
+### 获取 path 参数
 
-请求的参数通过URL路径传递，例如：`/user/search/fool/24`。 获取请求URL路径中的参数的方式如下。
+请求的参数通过 URL 路径传递，例如：`/user/search/fool/24`。 获取请求 URL 路径中的参数的方式如下。
 
 ```go
 func main() {
