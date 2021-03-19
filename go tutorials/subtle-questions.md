@@ -1,0 +1,9 @@
+- uint不能直接相减，结果是负数会变成一个很大的uint。
+- channel一定记得close。
+- goroutine记得return或者中断，不然容易造成goroutine占用大量CPU。
+- 从slice创建slice的时候，注意原slice的操作可能导致底层数组变化。如果你要创建一个很长的slice，尽量创建成一个slice里存引用，这样可以分批释放，避免gc在低配机器上stop the world
+- 面试的时候尽量了解协程，线程，进程的区别。
+- 明白channel是通过注册相关goroutine id实现消息通知的。
+- slice底层是数组，保存了len，capacity和对数组的引用。
+- 如果了解协程的模型，就知道所谓抢占式goroutine调用是什么意思。- 尽量了解互斥锁，读写锁，死锁等一些数据竞争的概念，debug的时候可能会有用。
+- 尽量了解golang的内存模型，知道多小才是小对象，为什么小对象多了会造成gc压力。
