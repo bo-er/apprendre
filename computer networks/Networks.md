@@ -287,34 +287,156 @@ subnet mask 表明了在计算 host id 的时候什么部分可以忽略，全�
 2. 建立长连接，通过错误检查以及数据校验确保数据准确性。
 
 - port
-  是一个16位的数字，用于将流量导向使用网络的目标网络服务。流量将被默认导向80端口。
-
+  是一个 16 位的数字，用于将流量导向使用网络的目标网络服务。流量将被默认导向 80 端口。
+  ![screenshot](./pictures/854415000.png)
 - TCP segment
-  由tcp header以及data section组成
+  由 tcp header 以及 data section 组成
 
   - tcp header
     ![screenshot](./pictures/376154000.png)
+
     - destination port
     - source port
     - sequence number
-      
-      记录当前数据处于一系列TCP片段中的顺序
+
+      记录当前数据处于一系列 TCP 片段中的顺序
+
     - acknowledgment number
 
-      是数据发送者所期待的下一个片段的序号，sequence number 1 跟acknowledgment number 2 表示这是序号1的数据，期待序号2的数据。
+      是数据发送者所期待的下一个片段的序号，sequence number 1 跟 acknowledgment number 2 表示这是序号 1 的数据，期待序号 2 的数据。
+
     - data offset field
 
-      一个长度4位，用于表示当前segment片段的TCP header有多长。
+      一个长度 4 位，用于表示当前 segment 片段的 TCP header 有多长。
+
     - tcp window
 
-      定义了可能会发送的序列号范围， 在收到acknowledgement之前。
+      定义了可能会发送的序列号范围
+
     - checksum
     - urgent pointer field
 
       跟`TCP control flag`一起使用，用于指出特定的比其他更重要的片段。
+
     - Options field
     - Padding field
-  
-  - TCP control flags
-  - ACK(ac)
-  - RST![screenshot](./pictures/32356000.png)
+
+  - TCP control flags(有 6 个)
+
+        - URG(urgent)
+
+          如果值是 1 表示该数据片段是紧急的，并且`urgent pointer field`会包含更多相关信息。
+
+        - ACK(ac)
+
+          如果值是 1 表示`acknowledgement number field`应该被检查
+
+        - PSH(push)
+
+          发送数据的设备希望接收数据的设备尽可能快的把`currently-buffered data`推送给接收端的应用。(buffer 就是一种在数据发送前存放在某个地方的技术)
+
+        - RST(reset)
+
+          TCP 连接的一方无法正确的从一系列 segment 丢失或者错误中恢复
+
+        - SYN(synchronize)
+
+          在初次建立 TCP 连接时使用，确保接收端知道要检查`sequnce number field`
+
+        - FIN(finish)
+
+          当这个值设置为 1，表示发送数据的计算机没有更多数据需要发送，连接可以关闭。
+
+- 三次握手建立连接:
+  ![screenshot](./pictures/212590000.png)
+  **Handshake**的作用是确保两个设备使用相同的协议并且他们能够互相理解。
+  ![screenshot](./pictures/326682000.png)
+
+- 四次握手关闭连接:
+  计算机使用`FIN`来表示自己可以关闭连接了，收到`FIN`请求的接收者返回一个`ACK`信息。
+  ![screenshot](./pictures/904503000.png)
+
+### TCP Socket States
+
+- Socket
+
+  The instantiation of an end-point in a potential TCP conenction
+  在可能建立的 TCP 连接上的端点。
+
+- Instantiation
+
+  在其他地方定义的某个东西的具体实现,TCP Socket 需要其他程序去实现它。
+  我们可以往任何一个`port`发送数据，但是只有程序在该`port`上打开了一个`socket` 你才能收到响应。
+
+- Listen(服务端)
+
+  一个 TCP socket 已经准备好了，开始监听进来的连接。
+
+- SYN_SENT(客户端)
+
+  一个同步请求已经发送，但是连接还没有建立。
+
+- SYN-RECEIVED
+
+  之前处于`LISTEN`状态的 socket 已经接收到了一个同步请求，并且发送了一个 `SYN/ACK` 回应
+
+- ESTABLISHED
+
+  TCP 连接处于工作的顺序，双方都可以给对方发送数据。
+
+- FIN_WAIT
+
+  一个`FIN`请求已经发送，但是对方还没有发送`ACK`响应。
+
+- CLOSE_WAIT
+
+  TCP 层的连接已经关闭，但是打开 socket 的应用还没有释放对`socket`的占有。
+
+- CLOSED
+
+  TCP 连接彻底关闭，不再会有通信发生
+
+### Connection Oriented and Connectionless Protocols
+
+- TCP 是面向连接的协议
+  到目前为止我们学习了 TCP,它是面向连接的协议。任何一个数据包的发送都需要被 acknowledged,因此只要没有收到`ack`发送数据的一方就能够重新发送数据包。
+
+  ![screenshot](./pictures/747870000.png)
+  由于`segment`是有序列号的，因此即使发生丢包也不会有问题。
+  ![screenshot](./pictures/304913000.png)
+
+- UDP 是面向无连接的协议
+  UDP 只需要 ip 跟端口号然后直接发送数据。
+
+### firewall
+
+防火墙是阻止特定流量的设备。防火墙在网络的各层都能部署，但是最常被部署到传输层。
+
+## Application Layer
+
+![screenshot](./pictures/704504000.png)
+![screenshot](./pictures/191563000.png)
+![screenshot](./pictures/813871000.png)
+
+当我们打开浏览器输入一个地址，计算机所在的网络 A 查看其子网掩码发现该地址不属于网络 A，于是计算机 1 知道需要将数据发送给网关，然后计算机 1 查看`ARP`表查找 10.1.1.1 的 mac 地址，但是它可能找不到地址，于是计算机 A 发送一个`ARP Request`,这个请求的目标地址是`FF:FF:FF:FF:FF:FF`，然后网关(Router A)将发送一个包含自己 mac 地址的响应，于是计算机 1 就能更新自己的`ARP`表格。
+![screenshot](./pictures/811326000.png)
+![screenshot](./pictures/781779000.png)
+![screenshot](./pictures/780443000.png)
+接着就构建一个 `TCP segment`
+![screenshot](./pictures/615019000.png)
+接着构建 `IP datagram`
+![screenshot](./pictures/207222000.png)
+接着构建 `ethernet frame`
+![screenshot](./pictures/696609000.png)
+
+![screenshot](./pictures/571446000.png)
+
+路由 A 发现数据是传给自己的就会对其计算`checksum`,如果 checksum 跟 ethernet 头部信息中的 checksum 一致那么路由 A 就知道数据是完整的。
+
+接着将 ip datagram 取出继续计算 checksum,然后路由 A 检查 ip datagram 的目标地址，在自己的 ARP 表中查找，发现为了抵达 172.16.1.100 最近只有 1 个 hop 的距离，于是 A 知道要把数据发送给 B。
+![screenshot](./pictures/752436000.png)
+
+接着 A 再构建 ethernet frame,发送给 B
+![screenshot](./pictures/171284000.png)
+![screenshot](./pictures/546857000.png)
+由于 B 取出 ip datagram 后发现目标 IP 地址在本地连接网络，因此将 TTL 减一，再封装为 ethernet frame 发送给网络 c 的 switch.
