@@ -440,3 +440,74 @@ subnet mask 表明了在计算 host id 的时候什么部分可以忽略，全�
 ![screenshot](./pictures/171284000.png)
 ![screenshot](./pictures/546857000.png)
 由于 B 取出 ip datagram 后发现目标 IP 地址在本地连接网络，因此将 TTL 减一，再封装为 ethernet frame 发送给网络 c 的 switch.
+
+## Network Services
+
+![screenshot](./pictures/896285000.png)
+
+### Standard Modern Network Configuration
+
+- IP address
+- Subnet mask
+- Gateway for a host
+- DNS server
+
+  - Caching name servers
+  - Recursive name servers
+
+    上面两种 DNS server 的作用是存储已知的域名并且在一定的时间内查询域名。Recursive name servers perform full DNS resolution requests.请求结束会将 ip 地址缓存起来，下一次其他人访问同样的域名就能直接返回 ip 地址。
+    ![screenshot](./pictures/739209000.png)
+    下面是`DNS resolution requests`的示意图:
+    ![screenshot](./pictures/665382000.png)
+    www.google.com中`.com`就是`TLD`(Top Level domain)
+    ![screenshot](./pictures/438132000.png)
+    ![screenshot](./pictures/560940000.png)
+    实际上电子设备也会缓存域名对应的 IP 地址。
+
+  - Root name servers
+  - TLD name servers
+  - Authoritative name servers
+
+### DNS and UDP
+
+如果 DNS Resolution Request 使用`TCP`解析域名信息，那么总共将发送 44 个 packets.如果使用 UDP 解析域名总共将发送 8 个 packets
+
+计算方式:
+首先三次握手 3 次数据包，然后发送 DNS Resolution Request 到 Caching/Recursive Name Server,server 会返回一个 ACK 表示自己收到了请求，加起来是 5 次。同理，Caching/Recursive Name Server 三次握手，关闭时再四次握手，发送数据以及受到数据各两个数据包，加起来就是 11 个数据包。
+
+- TCP
+  ![screenshot](./pictures/948732000.png)
+- UDP
+  ![screenshot](./pictures/61885000.png)
+
+实际上 DNS Resolution Request 有的时候也会使用 TCP 连接。
+![screenshot](./pictures/570443000.png)
+![screenshot](./pictures/446994000.png)
+
+如果域名十分复杂，那么一个 UDP datagram 无法容纳全部的域名，这种情况下 DNS Server 会响应一个`pakcet too large`的错误，只能建立 TCP 连接。![screenshot](./pictures/748217000.png)![screenshot](./pictures/474404000.png)
+
+### Resource Record Types
+
+- `A record`
+
+  is used to point to a certain domain name at a certain IPv4 IP address
+  a single A record is configured for a single domain name
+
+  - DNS ROUND ROBIN (DNS 负载均衡)
+
+- `AAAA-QuadA` record
+
+just like A record but it returns a IPv6 address
+
+- A `CNAME` record
+
+  is used to redirect traffic from one domain name to another,比如访问 google.com
+  的时候指向www.google.com
+
+- MX record - mail exchange
+
+- SRV record - service record
+
+- TXT record
+
+### Anatomy of a Domain Name
