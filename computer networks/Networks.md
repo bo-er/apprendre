@@ -511,3 +511,177 @@ just like A record but it returns a IPv6 address
 - TXT record
 
 ### Anatomy of a Domain Name
+
+- Top level domain (TLD)
+
+  www.google.com 中 `.com`就是顶级域名
+
+- Sub domain
+
+  `www`就是子域名
+
+- Fully qualified domain name (FQDN)
+
+DNS 理论上最高支持 127 级的 FQDN 域名
+
+- DNS zones
+
+allow for easier control over multiple levels of a domain.
+![screenshot](./pictures/196750000.png)
+如果一家名为 largecompany 的公司在三个地方设立办公室，每间办公室有 200 员工并且他们的计算机名都是唯一的，那么如果只有一个 `ZONE`就得维护 600 条`A记录`。这家公司可以让三个办公室每个都有自己的`ZONE`
+
+比如 la.largecompany.com,这样总共只需要 4 个 authorizied name server
+![screenshot](./pictures/155204000.png)
+
+- Zone files
+
+  Simple configuration files that declare all resources records for particular zone.
+
+- State of authority(SOA)
+
+Declares the zone and the name of the name server that is authoritative for it.
+
+- NS records
+
+Indicate other name servers that might also be responsible for this zone.
+
+- Pointer resources record (PTR)
+
+Resolves an IP to a name.
+
+### Dynamic Host Configuration Protocol (DHCP)
+
+任何基于 TCP/IP 网络的计算机都需要配置 4 项内容:
+
+- IP Address
+- Subnet mask for local network
+- Gateway
+- Name Server
+
+子网掩码、网关、域名服务器对于一个网络内的计算机来说都是一样的。但是网络内的每一个节点的 IP 地址
+需要是不同的。这个时候`DHCP`就能派上用场了。
+
+DHCP 是应用层的协议。由服务器控制一段 IP 地址范围，客户机登录服务器时就可以自动获得服务器分配的 IP 地址和子网掩码。
+有了 DHCP 只需要一个请求计算机就能获取到它的网络配置。
+![screenshot](./pictures/92338000.png)
+![screenshot](./pictures/328314000.png)
+
+- Dynamic allocation
+
+  A range of IP addresses is set aside for client devices and one of these Ips is issued to these devices when they reuqest one.(相当于每次请求 IP 都会变化)
+
+- Automatic Allocation
+
+  A range of IP addresses is set aside for assignment purposes.
+
+- Fixed allocation
+
+  Requires a manually specified list of MAC address and their corresponding IPs.
+  如果静态查找没有找到 IP 那么就会使用动态分配或者自动分配的方式，或者拒绝分配 IP。
+
+  ![screenshot](./pictures/428546000.png)
+
+- Network time protocol (NTP)
+
+被用于让一个网络内的计算机保持时间同步。
+
+DHCP 不仅可以用于分配 IP、子网掩码、网关以及域名服务器。
+
+### DHCP in Action
+
+- DHCP discovery
+
+The process by which a client configured to use DHCP attempts to get network configuration information.
+
+![screenshot](./pictures/916816000.png)
+
+![screenshot](./pictures/820827000.png)
+
+- DHCP REQUEST
+
+request 是一个广播请求
+![screenshot](./pictures/462824000.png)
+
+- DHCP ACK
+  ack 也使用广播，但是数据包里包含了目标地址的 mac 地址,因此只有 client 会接收这个 DHCP ACK
+  ![screenshot](./pictures/786986000.png)
+
+### NAT (Net Address Translation)
+
+也就是将一个 IP 翻译为另外一个 IP
+这项技术允许一个网关(通常是路由器或者防火墙)重写向外发送的 IP daatagram 的源 IP 地址并且
+
+![screenshot](./pictures/586227000.png)
+通常来说路由器会检查 IP datagram 的内容，将 TTL 减少 1，重新计算 checksum,然后在不改变数据包其他内容的情况下将数据发送出去。
+
+但是使用了`NAT`后路由还会修改 source ip 地址，这样一来数据接收方会以为数据来自路由器，而不是真正发送数据的一方。
+
+- IP masquerading
+
+  NAT 将隐藏数据包的真实 IP 地址。有了 NAT 网络 A 的 IP 可以有无数个，因为他们发送的数据包到了路由器都会被修改，发送给外界的时候源 IP 将是路由器的 IP。
+  ![screenshot](./pictures/963197000.png)
+
+- Port preservation
+
+  A technique where the source port chosen by a client is the same port used by the router.
+
+- Port Forwarding
+
+![screenshot](./pictures/706587000.png)
+![screenshot](./pictures/795876000.png)
+![screenshot](./pictures/800717000.png)
+
+- NAT, Non-Routable Address Space, the Limits of IPv4
+
+![screenshot](./pictures/998448000.png)
+
+Non-Routable Address Space 在`RFC1918`中定义。有了 NAT 技术你可以让几千台计算机使用 Non-Routable Address Space ，他们共享一个公共 IP。
+
+### Virtual Private Networks(VPNS and Proxies)
+
+VPNs are a technology that use encrypted tunnels to allow for a remote computer to act as if it's connected to a network that it's not actually physically connected to.
+
+![screenshot](./pictures/272958000.png)
+
+vpns provision something not locally avaliable,最早出现是为了解决远程办公无法访问内部网络的问题。
+
+![screenshot](./pictures/995988000.png)
+vpn 率先使用了双因子认证
+![screenshot](./pictures/140093000.png)
+
+
+VPN 跟 NAT 一样，是概念而不是协议。
+
+- Proxy Service
+
+  A server that acts on behalf of a client in order to access another service.
+
+  Proxy只是概念并不是具体的实现，实际上网络模型每一层都存在Proxy.
+
+  - Web Proxy
+
+    比如窄带时期通过使用Web Proxy,缓存远端服务器的网页，来提高网页的浏览速度。起到这种作用的计算机就是一种Proxy。
+
+  - Reverse Proxy
+
+      ![screenshot](./pictures/987760000.png)
+      反向代理将incoming requests分配给无数的物理服务器。跟DNS ROUND ROBING的概念类似，一种负载均衡。
+
+      反向代理被很多大网站使用的另外一个原因是 `DECRYPTION`
+      反向代理可以将加密的数据解密。
+      ![screenshot](./pictures/943776000.png)
+
+## Connecting To The Internet
+
+### POTS and Dial-up
+
+### Broadband Connections
+
+  - T-Carrier technologies
+
+  - DSL
+  - Cable broadband
+  - Fiber connections
+
+## Wireless Networking
+
