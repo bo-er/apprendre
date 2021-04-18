@@ -216,7 +216,7 @@ func main() {
 		return
 	}
 
-	certBytes, err := ioutil.ReadFile("client.pem")
+	certBytes, err := ioutil.ReadFile("cacert.pem")
 	if err != nil {
 		panic("Unable to read cert.pem")
 	}
@@ -295,9 +295,9 @@ func main() {
 		return
 	}
 
-	certBytes, err := ioutil.ReadFile("client.pem")
+	certBytes, err := ioutil.ReadFile("cacert.pem")
 	if err != nil {
-		panic("Unable to read cert.pem")
+		panic("Unable to read cacert.pem")
 	}
 
 	clientCertPool := x509.NewCertPool()

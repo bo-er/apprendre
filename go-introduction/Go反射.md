@@ -5,6 +5,31 @@ Go 语言中的变量是分为两部分的:
 - 类型信息：预先定义好的元信息。
 - 值信息：程序运行过程中可动态变化的。
 
+## 值为 Nil 的空接口
+
+```go
+type MyError struct {
+	msg string
+}
+
+func (e MyError) Error() string {
+	return e.msg
+}
+
+func getError() error {
+	var p *MyError = nil
+	return p
+}
+
+func main() {
+	p := getError()
+	var a *MyError = nil
+	fmt.Println(p == nil, a == nil)
+}
+```
+
+打印结果为: `true false`
+
 # 反射介绍
 
 反射是指在程序运行期对程序本身进行访问和修改的能力。程序在编译时，变量被转换为内存地址，变量名不会被编译器写入到可执行部分。在运行程序时，程序无法获取自身的信息。
@@ -293,7 +318,7 @@ type student struct {
 
 func main() {
 	stu1 := student{
-		Name:  "小王子",
+		Name:  "steve",
 		Score: 90,
 	}
 
