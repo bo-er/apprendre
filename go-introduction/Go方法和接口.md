@@ -706,6 +706,59 @@ main.main()
 	/tmp/sandbox005824404/prog.go:17 +0x1fe
 ```
 
+```go
+// WashingMachine 洗衣机
+type WashingMachine interface {
+	wash()
+	dry()
+}
+
+// 烘干机
+type Dryer interface {
+	dry()
+}
+
+// 实现WashingMachine接口的dry()方法
+func (h haier) dry() {
+	fmt.Println("甩一甩")
+}
+
+// 格力烘干机
+type greeDryer struct {
+
+}
+
+// 格力烘干机的dry()方法
+func (g greeDryer) dry() {
+	fmt.Println("甩一甩")
+}
+
+// 海尔洗衣机
+type haier struct {
+
+}
+
+// 实现WashingMachine接口的wash()方法
+func (h haier) wash() {
+	fmt.Println("洗刷刷")
+}
+
+// 下面在编辑器中 右边部分会有一个红色的下标提示 missing method wash
+var _ WashingMachine = (*gree)(nil)
+
+//下面的将接口d断言为接口WashMachine的操作不会引起编译器检查失败，
+//只能在运行中失败，因此必须上面的检查才能在编译时发现类型断言失败。
+func main() {
+	var d Dryer
+	d = greeDryer{}
+	var w WashingMachine
+	w = d.(WashingMachine)
+	w.dry()
+}
+
+```
+
+
 ### 类型选择
 
 `类型选择`是一种按顺序从几个类型断言中选择分支的结构。

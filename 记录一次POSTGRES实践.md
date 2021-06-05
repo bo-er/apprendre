@@ -71,3 +71,11 @@ psql --variable=ON_ERROR_STOP=1 --username "postgres" <<-EOSQL
 EOSQL
 ```
 
+
+### github ci 实践
+
+- Problem
+  遇到了一个问题，postgresql初始化多个数据库，使用step:
+  ```
+  
+  ```

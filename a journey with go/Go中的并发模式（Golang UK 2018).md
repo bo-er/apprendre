@@ -156,7 +156,7 @@ func TurnOut(Quit <- chan int,InA,InB,OutA,OutB chan int) {
 - These instructions only work on integer types
 - Only about 10 - 60x slower than their non-atomic counterparts
 
-Spining CAS 
+Spining CAS (CAS Algorithem)
 
 - You need a state variable and a "free" constant
 - Use CAS(CompareAndSwap) in a loop
@@ -173,6 +173,7 @@ type Spinlock struct{
 const free = int32(0)
 
 func (l *Spinlock) Lock() {
+	// 检查l.state的值是否跟free相等，如果是的那么交换并且返回true
 	for !atomic.CompareAndSwapInt32(l.state,free,42) {
 		// Gosched yields the processor, allowing other goroutines to run. It does not
 		// suspend the current goroutine, so execution resumes automatically.
