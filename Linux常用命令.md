@@ -1,4 +1,4 @@
-## SCP
+
 
 ### 使用 rsa key
 
@@ -72,3 +72,14 @@ echo "password" | sudo -S command
 ```sh
  -S, --stdin                   read password from standard input
 ```
+
+### 删除docker中的全部容器
+
+```
+docker ps -a | awk '{print $1}' | xargs docker rm -f   
+
+```
+
+其中 `xargs`的作用是
+
+
