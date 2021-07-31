@@ -633,3 +633,13 @@ func printMemStats(mag string) {
 ```
 
 很明显可以看到 delete 是不会真正的把 map 释放的，所以要**回收 map 还是需要设为 nil**
+
+看memberlist的一个例子: 
+
+```go
+	for i := deadIdx; i < len(m.nodes); i++ {
+		delete(m.nodeMap, m.nodes[i].Name)
+		m.nodes[i] = nil  // Avoid memory leak of dead nodes
+	}
+
+```
