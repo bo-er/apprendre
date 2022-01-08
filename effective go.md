@@ -2283,3 +2283,52 @@ const templateStr =`
 模板字符串的其余部分只是页面加载时显示的 HTML。如果解释太快，请参阅 模板包的[文档](https://golang.google.cn/pkg/html/template/)以进行更全面的讨论。
 
 在那里，您可以找到：一个有用的 Web 服务器，其中包含几行代码以及一些数据驱动的 HTML 文本。Go 的功能强大到足以在几行中完成很多事情。
+
+
+helm install nfs-client-provisioner \
+--set storageClass.name=nfs-client \
+--set storageClass.defaultClass=true \
+--set nfs.server=10.186.62.92 \
+--set nfs.path=/mnt/nfs/ \
+apphub/nfs-client-provisioner
+
+
+rancher/mirrored-coreos-flannel
+rancher/nginx-ingress-controller
+rancher/hyperkube
+rancher/rancher-agent
+rancher/rancher
+rancher/mirrored-ingress-nginx-kube-webhook-certgen
+rancher/fleet-agent
+rancher/mirrored-calico-node
+rancher/mirrored-calico-pod2daemon-flexvol
+rancher/mirrored-calico-cni
+rancher/mirrored-calico-kube-controllers
+rancher/rke-tools
+rancher/kube-api-auth
+rancher/mirrored-coredns-coredns
+rancher/mirrored-metrics-server
+rancher/mirrored-coreos-etcd
+rancher/mirrored-pause
+rancher/mirrored-cluster-proportional-autoscaler
+
+rancher/rancher
+rancher/mirrored-coreos-flannel
+rancher/hyperkube
+rancher/rancher-agent
+rancher/mirrored-calico-node
+rancher/mirrored-calico-pod2daemon-flexvol
+rancher/mirrored-calico-cni
+rancher/rke-tools
+rancher/kube-api-auth
+rancher/mirrored-coredns-coredns
+rancher/mirrored-coreos-etcd
+rancher/mirrored-pause
+
+
+rancher/hyperkube
+rancher/rancher-agent
+rancher/mirrored-calico-pod2daemon-flexvol
+rancher/mirrored-calico-cni
+rancher/rke-tools
+rancher/mirrored-pause

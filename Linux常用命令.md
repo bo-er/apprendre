@@ -108,13 +108,14 @@ awk -F ":" '{print $1 " " $2 " " $3}' /etc/passwd
 
 3. 正则表达式匹配
 
-使用'/^\//'来搜索以`\`开头的column
+使用'/^\//'来搜索以`\`开头的 column
 
 ```
 awk -F "/" '/^\// {print $NF}' /etc/shells
 
 ```
-/etc/shells的内容为:
+
+/etc/shells 的内容为:
 
 ```
 /bin/sh
@@ -122,6 +123,7 @@ awk -F "/" '/^\// {print $NF}' /etc/shells
 /usr/bin/sh
 /usr/bin/bash
 ```
+
 将输出:
 
 ```
@@ -153,7 +155,7 @@ bash
 awk 'length($0) > 7'  /etc/shells
 ```
 
-6. 使用if查找 `./bin/umc`
+6. 使用 if 查找 `./bin/umc`
 
 ```
 ps -ef | awk '{  if($NF == "./bin/umc") print $0}'
@@ -163,4 +165,41 @@ ps -ef | awk '{  if($NF == "./bin/umc") print $0}'
 
 ```
 awk  'match($0, /bash/) {print $0 }' /etc/shells
+```
+
+### 查询某个文件夹下最近 60 分钟被修改过的文件
+
+"modified file's data" (mtime) means that the content was modified. This date can be manually changed (e.g. with touch).
+
+```
+find . -mtime -1  (最近1天)
+```
+
+"changed file's status" (ctime) means that either the content was changed, or the file's metadata (permission, owner, etc). This can not be changed manually.
+
+```
+find . -mmin -60 (最近60分钟)
+```
+
+8. 使用 cut 命令(https://shapeshed.com/unix-cut/)
+
+使用场景:
+
+下面是 Glibc 的版本信息:
+
+```
+ldd (GNU libc) 2.28
+```
+
+现在需要获取 28 这个小版本号,可以使用`cut -d`:
+
+man:
+
+```
+-d, --delimiter=DELIM
+              use DELIM instead of TAB for field delimiter
+```
+
+```
+ldd --version | grep ldd | cut -d' ' -f4 | cut -d. -f2
 ```
